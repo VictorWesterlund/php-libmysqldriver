@@ -1,8 +1,8 @@
 <?php
 
-  namespace DBDriver;
+  namespace libmysqldriver;
 
-	class MySQLDriver extends mysqli {
+	class MySQL extends mysqli {
 		function __construct(string $host, string $user, string $pass, string $db) {
 			parent::__construct($host, $user, $pass, $db);
 		}

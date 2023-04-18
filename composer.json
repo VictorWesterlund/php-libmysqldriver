@@ -1,5 +1,5 @@
 {
-    "name": "victorwesterlund/db-driver-mysqli",
+    "name": "victorwesterlund/libmysqldriver",
     "description": "Abstraction library for common mysqli features",
     "type": "library",
     "license": "GPL-3.0-only",
@@ -12,7 +12,7 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "DBDriver\\": "src/"
+            "libmysqldriver\\": "src/"
         }
     },
     "require": {}
