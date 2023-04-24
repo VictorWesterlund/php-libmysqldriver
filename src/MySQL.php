@@ -1,6 +1,6 @@
 <?php
 
-  namespace libmysqldriver;
+	namespace libmysqldriver;
 
 	class MySQL extends \mysqli {
 		function __construct(string $host, string $user, string $pass, string $db) {
