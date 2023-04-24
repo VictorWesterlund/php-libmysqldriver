@@ -8,7 +8,7 @@
 		}
 
 		// Bind SQL statements
-		private function bind_params(mysqli_stmt &$stmt, mixed $params) {
+		private function bind_params(\mysqli_stmt &$stmt, mixed $params) {
 			// Make single-value, non-array, param an array with length of 1
 			if (gettype($params) !== "array") {
 				$params = [$params];
@@ -44,7 +44,7 @@
 		}
 
 		// Execute an SQL query with a prepared statement
-		private function run_query(string $sql, mixed $params = null): mysqli_result|bool {
+		private function run_query(string $sql, mixed $params = null): \mysqli_result|bool {
 			$stmt = $this->prepare($sql);
 
 			// Bind parameters if provided
