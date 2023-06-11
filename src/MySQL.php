@@ -3,7 +3,13 @@
 	namespace libmysqldriver;
 
 	class MySQL extends \mysqli {
-		function __construct(string $host, string $user, string $pass, string $db) {
+		function __construct(
+			// From: https://www.php.net/manual/en/mysqli.construct.php
+			string|null $host = null,
+			string|null $user = null,
+			string|null $pass = null,
+			string|null $db = null
+		) {
 			parent::__construct($host, $user, $pass, $db);
 		}
 
