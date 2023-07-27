@@ -13,6 +13,11 @@
 			parent::__construct($host, $user, $pass, $db);
 		}
 
+		// Place value in array
+		private static function to_array(mixed $value): array {
+			return is_array($value) ? $value : [$value];
+		}
+
 		// Bind SQL statements
 		private function bind_params(\mysqli_stmt &$stmt, mixed $params) {
 			// Make single-value, non-array, param an array with length of 1
@@ -116,5 +121,17 @@
 			}
 			
 			return $query->num_rows > 0 ? true : false;
+		}
+
+		public function select(string $table, array|string $columns = null, string $where = "") {
+			// SELECT all columns if $columns is empty (wildcard "*")
+			$columns = self::to_array($columns ? $columns : "*");
+
+			if ($where) {
+				$clause = preg_match_all("/[<>!=]=|<=|>=|<>|>|<|=|LIKE|IN|IS|REGEXP/", $where);
+				$test = true;
+			}
+
+			$sql = "SELECT . FROM ${table}" . $where;
 		}
 	}
