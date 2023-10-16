@@ -43,8 +43,10 @@ $db->get(
   array|string $columns,
   // (Optional) key, value array of column names and values to filter with WHERE <column> = <value>
   ?array $filter = null,
+  // (Optional) order by columns name => direction ("ASC"|"DESC")
+  ?array $order_by = null,
   // (Optional) max number of rows to return
-  ?int $limit = null
+  int|array|null $limit = null
 ): array|bool;
 // Returns array of arrays for each row, or bool if $columns = null
 ```
@@ -93,21 +95,67 @@ $coffee = $db->get("beverages", $columns, $filter);
 ]
 ```
 
-## LIMIT
+## ORDER BY
 
-You can also pass an optional integer as the 4:th argument to `MySQL->get()` and `LIMIT` the rows to match
-
-> **Note**
-> Passing (int) `1` will flatten the returned array to two dimensions (k => v)
+You can also pass an associative array as the 4:th argument to `MySQL->get()` to `ORDER BY` a column or multiple columns
 
 ```php
-$coffee = $db->get("beverages", $columns, $filter, 1);
+$coffee = $db->get("beverages", $columns, $filter, ["beverage_name" => "ASC"], 2);
+// SELECT beverage_name, beverage_size FROM beverages ORDER BY beverage_name ASC LIMIT 2
+```
+```php
+[
+  [
+    "beverage_name" => "tea",
+    "beverage_size" => 10
+  ],
+  [
+    "beverage_name" => "tea",
+    "beverage_size" => 15
+  ],
+  // ...etc for "beverage_name = coffee"
+]
+```
+
+## LIMIT
+
+You can also pass an optional integer or associative array as the 5:th argument to `MySQL->get()` and `LIMIT` the rows to match.
+
+> **Note**
+> Passing (int) `1` will flatten the returned array from `get()` to two dimensions (k => v)
+
+### Passing an integer to LIMIT
+This will simply `LIMIT` the results returned to the integer passed
+
+```php
+$coffee = $db->get("beverages", $columns, $filter, null, 1);
 // SELECT beverage_name, beverage_size FROM beverages WHERE beverage_type = "coffee" LIMIT 1
 ```
 ```php
 [
   "beverage_name" => "cappuccino",
   "beverage_size" => 10
+]
+```
+
+### Passing an associative array to LIMIT
+This will `OFFSET` and `LIMIT` the results returned from the first key of the array as `OFFSET` and the value of that key as `LIMIT`
+
+```php
+$coffee = $db->get("beverages", $columns, $filter, null, [3 => 2]);
+// SELECT beverage_name, beverage_size FROM beverages LIMIT 3 OFFSET 2
+```
+```php
+[
+  [
+    "beverage_name" => "tea",
+    "beverage_size" => 10
+  ],
+  [
+    "beverage_name" => "tea",
+    "beverage_size" => 15
+  ],
+  // ...etc
 ]
 ```
 
