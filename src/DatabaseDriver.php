@@ -6,17 +6,17 @@
 	use \mysqli_stmt;
 	use \mysqli_result;
 
-    // MySQL query builder and executer abstractions
-    class DatabaseDriver extends mysqli {
+	// MySQL query builder and executer abstractions
+	class DatabaseDriver extends mysqli {
 		// Passing arguments to https://www.php.net/manual/en/mysqli.construct.php
-        function __construct() {
+		function __construct() {
 			parent::__construct(...func_get_args());
 		}
 
-        // Create CSV from array
-        private static function csv(array $items): string {
-            return implode(",", $items);
-        }
+		// Create CSV from array
+		private static function csv(array $items): string {
+			return implode(",", $items);
+		}
 
 		/* ---- */
 
@@ -118,4 +118,4 @@
 				// Return true if rows were matched
 				: $query->num_rows > 0;
 		}
-    }
+	}
