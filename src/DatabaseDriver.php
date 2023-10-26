@@ -13,29 +13,6 @@
 			parent::__construct(...func_get_args());
 		}
 
-		// Create CSV from array
-		private static function csv(array $items): string {
-			return implode(",", $items);
-		}
-
-		/* ---- */
-
-		// Create CSV from columns
-		public static function columns(array|string $columns): string {
-			return is_array($columns) 
-				? self::csv($columns)
-				: $columns;
-		}
-
-		// Return CSV of '?' for use with prepared statements
-		public static function values(array|string $values): string {
-			return is_array($values) 
-				? self::csv(array_fill(0, count($values), "?"))
-				: "?";
-		}
-
-		/* ---- */
-
 		// Bind SQL statements
 		private function bind_params(mysqli_stmt &$stmt, mixed $params): bool {
 			// Convert single value parameter to array
