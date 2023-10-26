@@ -1,6 +1,20 @@
 # php-libmysqldriver
 
-This library provides abstraction methods for common operations on MySQL-like databases like `SELECT`, `UPDATE`, and `INSERT`.
+This library provides abstraction methods for common operations on MySQL-like databases like `SELECT`, `UPDATE`, and `INSERT` using method chaining for the various MySQL features.
+
+For example:
+```php
+$db->for(string $table)
+->with(array $model)
+->where(array $filters)
+->order(array $order_by)
+->limit(1)
+->select(array $columns): array|bool;
+```
+which would be equivalent to the following in MySQL:
+```sql
+SELECT $columns FROM $table WHERE $filter ORDER BY $order_by LIMIT $limit;
+```
 
 This library is built on top of the PHP [`MySQL Improved`](https://www.php.net/manual/en/book.mysqli.php) extension.
 
@@ -14,7 +28,19 @@ composer require victorwesterlund/libmysqldriver
 use libmysqldriver/MySQL;
 ```
 
-----
+# Example / Documentation
+
+Available statements
+Statement|Method
+--|--
+`SELECT`|[`select()`](#select)
+`UPDATE`|[`update()`](#update)
+`INSERT`|[`insert()`](#insert)
+`WHERE`|[`where()`](#where)
+`ORDER BY`|[`order()`](#order-by)
+`LIMIT`|[`limit()`](#limit)
+
+---
 
 `Example table name: beverages`
 id|beverage_type|beverage_name|beverage_size
@@ -33,31 +59,22 @@ $db = new MySQL($host, $user, $pass, $db);
 
 # SELECT
 
-Use `MySQL->get()` to retrieve columns from a database table
+Use `MySQL->select()` to retrieve columns from a database table
 
 ```php
-$db->get(
-  // Name of the database table
-  string $table,
-  // (Optional) array or string of column(s) names to SELECT
-  array|string $columns,
-  // (Optional) key, value array of column names and values to filter with WHERE <column> = <value>
-  ?array $filter = null,
-  // (Optional) order by columns name => direction ("ASC"|"DESC")
-  ?array $order_by = null,
-  // (Optional) max number of rows to return
-  int|array|null $limit = null
+$db->select(
+  // Sequential array of string with column names to retrieve
+  // Or null to retrieve a bool if rows were matched
+  ?array $columns
 ): array|bool;
-// Returns array of arrays for each row, or bool if $columns = null
+// Returns array of arrays for each row, or bool if no columns were defined
 ```
+
+In most cases you probably want to select with a constraint. Chain the [`where()`](#where) method before `select()` to filter the query
 
 ### Example
 ```php
-// (Optional) array of columns to return from table. Passing null will return a bool if rows were matched
-$columns = ["beverage_name", "beverage_size"];
-
-$beverages = $db->get("beverages", $columns);
-// SELECT beverage_name, beverage_size FROM beverages
+$beverages = $db->for("beverages")->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages
 ```
 ```
 [
@@ -73,14 +90,63 @@ $beverages = $db->get("beverages", $columns);
 ]
 ```
 
-## WHERE
+# INSERT
+
+Use `MySQL->insert()` to append a new row to a database table
 
 ```php
-// (Optional) associative array of filters where "<column_name> = <value>"
-$filter = ["beverage_type" => "coffee"];
+$db->insert(
+  // Array of values to INSERT
+  array $values
+): bool
+// Returns true if row was inserted
+```
 
-$coffee = $db->get("beverages", $columns, $filter);
-// SELECT beverage_name, beverage_size FROM beverages WHERE beverage_type = "coffee"
+#### Example
+
+```php
+$db->for("beverages")->insert([
+  null,
+  "coffee",
+  "latte",
+  10
+]);
+// INSERT INTO beverages VALUES (null, "coffee", "latte", 10);
+```
+```
+true
+```
+
+# UPDATE
+
+Modify existing rows with `MySQL->update()`
+
+```php
+$db->get(
+  // Key, value array of column names and values to update
+  array $fields,
+): bool;
+// Returns true if at least 1 row was changed
+```
+
+### Example
+```php
+$db->for("beverages")->update(["beverage_size" => 10]); // UPDATE beverages SET beverage_size = 10
+```
+```php
+true
+```
+
+In most cases you probably want to UPDATE against a constaint. Chain a [`where()`](#where) method before `update()` to set constraints
+
+
+# WHERE
+
+Filter a `select()` or `update()` method by chaining the `MySQL->where()` method anywhere before it.
+
+### Example
+```php
+$coffee = $db->for("beverages")->where(["beverage_type" => "coffee"])->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages WHERE (beverage_type = "coffee");
 ```
 ```php
 [
@@ -95,13 +161,52 @@ $coffee = $db->get("beverages", $columns, $filter);
 ]
 ```
 
-## ORDER BY
+## Advanced filtering
 
-You can also pass an associative array as the 4:th argument to `MySQL->get()` to `ORDER BY` a column or multiple columns
+You can do more detailed filtering by passing more constraints into the same array, or even futher by passing multiple arrays each with filters.
+
+### AND
+
+Add additional key value pairs to an array passed to `where()` and they will all be compared as AND with each other.
 
 ```php
-$coffee = $db->get("beverages", $columns, $filter, ["beverage_name" => "ASC"], 2);
-// SELECT beverage_name, beverage_size FROM beverages ORDER BY beverage_name ASC LIMIT 2
+MySQL->where([
+  "beverage_type" => "coffee",
+  "beverage_size" => 15
+]);
+```
+```sql
+WHERE (beverage_type = 'coffee' AND beverage_size = 15)
+```
+
+### OR
+
+Passing an additional array of key values as an argument will OR it with all other arrays passed.
+
+```php
+$filter1 = [
+  "beverage_type" => "coffee",
+  "beverage_size" => 15
+];
+
+$filter2 = [
+  "beverage_type" => "tea",
+  "beverage_name" => "black"
+];
+
+MySQL->where($filter1, $filter2, ...);
+```
+```sql
+WHERE (beverage_type = 'coffee' AND beverage_size = 15) OR (beverage_type = 'tea' AND beverage_name = 'black')
+```
+
+
+# ORDER BY
+
+Chain the `order()` method before a `select()` statement to order by a specific column
+
+```php
+$coffee = $db->for("beverages")->order(["beverage_name" => "ASC"])->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages ORDER BY beverage_name ASC
 ```
 ```php
 [
@@ -117,19 +222,18 @@ $coffee = $db->get("beverages", $columns, $filter, ["beverage_name" => "ASC"], 2
 ]
 ```
 
-## LIMIT
+# LIMIT
 
-You can also pass an optional integer or associative array as the 5:th argument to `MySQL->get()` and `LIMIT` the rows to match.
+Chain the `limit()` method before a `select()` statement to limit the amount of columns returned
 
 > **Note**
-> Passing (int) `1` will flatten the returned array from `get()` to two dimensions (k => v)
+> Passing (int) `1` will flatten the returned array from a `select()` statement to two dimensions (k => v)
 
-### Passing an integer to LIMIT
+## Passing an integer to LIMIT
 This will simply `LIMIT` the results returned to the integer passed
 
 ```php
-$coffee = $db->get("beverages", $columns, $filter, null, 1);
-// SELECT beverage_name, beverage_size FROM beverages WHERE beverage_type = "coffee" LIMIT 1
+$coffee = $db->for("beverages")->limit(1)->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages WHERE beverage_type = "coffee" LIMIT 1
 ```
 ```php
 [
@@ -138,12 +242,11 @@ $coffee = $db->get("beverages", $columns, $filter, null, 1);
 ]
 ```
 
-### Passing an associative array to LIMIT
+## Passing an associative array to LIMIT
 This will `OFFSET` and `LIMIT` the results returned from the first key of the array as `OFFSET` and the value of that key as `LIMIT`
 
 ```php
-$coffee = $db->get("beverages", $columns, $filter, null, [3 => 2]);
-// SELECT beverage_name, beverage_size FROM beverages LIMIT 3 OFFSET 2
+$coffee = $db->for("beverages")->limit([3 => 2])->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages LIMIT 3 OFFSET 2
 ```
 ```php
 [
@@ -157,73 +260,4 @@ $coffee = $db->get("beverages", $columns, $filter, null, [3 => 2]);
   ],
   // ...etc
 ]
-```
-
-# INSERT
-
-Use `MySQL->insert()` to append a new row to a database table
-
-```php
-$db->insert(
-  // Name of the database table
-  string $table,
-  // Array of values to INSERT
-  array $values
-): bool
-// Returns true if row was inserted
-```
-
-#### Example
-
-```php
-$db->insert("beverages", [
-  null,
-  "coffee",
-  "latte",
-  10
-]);
-// INSERT INTO beverages VALUES (null, "coffee", "latte", 10)
-```
-```
-true
-```
-
-# UPDATE
-
-Modify existing rows with `MySQL->update()`
-
-```php
-$db->get(
-  // Name of the database table
-  string $table,
-  // Key, value array of column names and values to update
-  array $fields,
-  // (Optional) key, value array of column names and values to limit UPDATE to with WHERE <column> = <value>
-  ?array $filter = null,
-): bool;
-// Returns true if at least 1 row was changed
-```
-
-### Example
-```php
-$db->update("beverages", ["beverage_size" => 10]);
-// UPDATE beverages SET beverage_size = 10
-```
-```php
-true
-```
-
-## WHERE
-
-In most cases you probably want to UPDATE against a constaint. Passing an array to the 3:rd argument of `MySQL->update()` will let you define "equals AND" conditions.
-
-```php
-$filter = ["beverage_type" => "coffee"];
-$update = ["beverage_size" => 10];
-
-$db->update("beverages", $update, $filter);
-// UPDATE beverages SET beverage_size = 10 WHERE beverage_type = "coffee"
-```
-```php
-true
 ```
