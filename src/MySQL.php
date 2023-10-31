@@ -12,7 +12,7 @@
 	// Interface for MySQL_Driver with abstractions for data manipulation
 	class MySQL extends DatabaseDriver {
 		private string $table;
-		private array $model;
+		private ?array $model = null;
 
 		private ?string $order_by = null;
 		private ?string $filter_sql = null;
@@ -151,8 +151,6 @@
 
 			// Interpolate components into an SQL SELECT statmenet and execute
 			$sql = "SELECT {$columns_sql} FROM {$this->table}{$filter_sql}{$order_by_sql}{$limit_sql}";
-
-			$test = $this->model;
 
 			// No columns were specified, return true if query matched rows
 			if (!$columns) {
