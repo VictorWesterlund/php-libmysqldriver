@@ -20,7 +20,7 @@
 		private int|string|null $limit = null;
 
 		// Pass constructor arguments to driver
-		function __construct(string $table) {
+		function __construct() {
 			parent::__construct(...func_get_args());
 		}
 
