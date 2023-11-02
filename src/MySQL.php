@@ -48,7 +48,13 @@
 		}
 
 		// Restrict query to array of column names
-		public function with(array $model): self {
+		public function with(?array $model = null): self {
+			// Remove table model if empty
+			if (!$model) {
+				$this->model = null;
+				return $this;
+			}
+
 			// Reset table model
 			$this->model = [];
 
