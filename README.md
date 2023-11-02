@@ -59,13 +59,13 @@ $db = new MySQL($host, $user, $pass, $db);
 
 # SELECT
 
-Use `MySQL->select()` to retrieve columns from a database table
+Use `MySQL->select()` to retrieve columns from a database table.
+
+Pass an associative array of strings, CSV string, or null to this method to filter columns.
 
 ```php
 $db->select(
-  // Sequential array of string with column names to retrieve
-  // Or null to retrieve a bool if rows were matched
-  ?array $columns
+  array|string|null $columns
 ): array|bool;
 // Returns array of arrays for each row, or bool if no columns were defined
 ```
@@ -75,6 +75,7 @@ In most cases you probably want to select with a constraint. Chain the [`where()
 ### Example
 ```php
 $beverages = $db->for("beverages")->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages
+$beverages = $db->for("beverages")->select("beverage_name, beverage_size"); // SELECT beverage_name, beverage_size FROM beverages
 ```
 ```
 [
