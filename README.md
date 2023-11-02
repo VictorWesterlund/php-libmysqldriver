@@ -90,6 +90,24 @@ $beverages = $db->for("beverages")->select(["beverage_name", "beverage_size"]); 
 ]
 ```
 
+## Flatten array to single dimension
+
+If you don't want an array of arrays and would instead like to access each key value pair directly. Chain the `MySQL->flatten()` anywhere before `MySQL->select()`.
+This will return the key value pairs of the first entry directly.
+
+> **Note**
+> This method will not set `LIMIT 1` for you. It is recommended to chain `MySQL->limit(1)` anywhere before `MySQL->select()`. [You can read more about it here](https://github.com/VictorWesterlund/php-libmysqldriver/issues/14)
+
+```php
+$coffee = $db->for("beverages")->limit(1)->flatten()->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages WHERE beverage_type = "coffee" LIMIT 1
+```
+```php
+[
+  "beverage_name" => "cappuccino",
+  "beverage_size" => 10
+]
+```
+
 # INSERT
 
 Use `MySQL->insert()` to append a new row to a database table
@@ -227,7 +245,7 @@ $coffee = $db->for("beverages")->order(["beverage_name" => "ASC"])->select(["bev
 Chain the `limit()` method before a `select()` statement to limit the amount of columns returned
 
 > **Note**
-> Passing (int) `1` will flatten the returned array from a `select()` statement to two dimensions (k => v)
+> You can also flatten to a single dimensional array from the first entity by chaining [`MySQL->flatten()`](#flatten-array-to-single-dimension)
 
 ## Passing an integer to LIMIT
 This will simply `LIMIT` the results returned to the integer passed
@@ -237,8 +255,10 @@ $coffee = $db->for("beverages")->limit(1)->select(["beverage_name", "beverage_si
 ```
 ```php
 [
-  "beverage_name" => "cappuccino",
-  "beverage_size" => 10
+  [
+    "beverage_name" => "cappuccino",
+    "beverage_size" => 10
+  ]
 ]
 ```
 
