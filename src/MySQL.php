@@ -136,8 +136,11 @@
 		/* ---- */
 
 		// Create Prepared Statament for SELECT with optional WHERE filters
-		public function select(?array $columns = null): array|bool {
+		public function select(array|string|null $columns = null): array|bool {
 			$this->throw_if_no_table();
+
+			// Create array of columns from CSV
+			$columns = is_array($columns) ? $columns : explode(",", $columns);
 
 			// Filter columns that aren't in the model if defiend
 			if ($columns && $this->model) {
