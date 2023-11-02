@@ -14,6 +14,7 @@
 		private string $table;
 		private ?array $model = null;
 
+		private bool $flatten = false;
 		private ?string $order_by = null;
 		private ?string $filter_sql = null;
 		private array $filter_values = [];
@@ -115,6 +116,12 @@
 			return $this;
 		}
 
+		// Flatten returned array to first entity if set
+		public function flatten(bool $flag = true): self {
+			$this->flatten = $flag;
+			return $this;
+		}
+
 		// Return SQL SORT BY string from assoc array of columns and direction
 		public function order(array $order_by): self {
 			// Create CSV from columns
@@ -159,8 +166,8 @@
 
 			// Return array of matched rows
 			$exec = $this->exec($sql, $this->filter_values);
-			// Flatten array if LIMIT is 1
-			return empty($exec) || $this->limit !== 1 ? $exec : $exec[0];
+			// Return array if exec was successful. Return as flattened array if flag is set
+			return empty($exec) || !$this->flatten ? $exec : $exec[0];
 		}
 
 		// Create Prepared Statement for UPDATE using PRIMARY KEY as anchor
