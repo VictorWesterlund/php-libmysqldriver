@@ -40,7 +40,7 @@ Statement|Method
 `ORDER BY`|[`order()`](#order-by)
 `LIMIT`|[`limit()`](#limit)
 
----
+----
 
 `Example table name: beverages`
 id|beverage_type|beverage_name|beverage_size
@@ -282,3 +282,13 @@ $coffee = $db->for("beverages")->limit([3 => 2])->select(["beverage_name", "beve
   // ...etc
 ]
 ```
+
+----
+
+# Restrict affected/returned database columns to table model
+
+Chain and pass an array to `MySQL->with()` before a `select()`, `update()`, or `insert()` method to limit which columns will be returned/affected. It will use the **values** of the array so it can be either sequential or associative.
+
+**This method will cause `select()`, `update()`, and `insert()` to ignore any columns that are not present in the passed table model.**
+
+You can remove an already set table model by passing `null` to `MySQL->with()`
