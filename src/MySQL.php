@@ -72,13 +72,18 @@
 		}
 
 		// Create a WHERE statement from filters
-		public function where(?array ...$conditions): self {
+		public function where(array ...$conditions): self {
 			$values = [];
 			$filters = [];
 
 			// Group each condition into an AND block
 			foreach ($conditions as $condition) {
 				$filter = [];
+
+				// Move along if the condition is empty
+				if (empty($condition)) {
+					continue;
+				}
 
 				// Create SQL string and append values to array for prepared statement
 				foreach ($condition as $col => $value) {
@@ -94,6 +99,11 @@
 
 				// AND together all conditions into a group
 				$filters[] = "(" . implode(" AND ", $filter) . ")";
+			}
+
+			// Do nothing if no filters were set
+			if (empty($filters)) {
+				return $this;
 			}
 
 			// OR all filter groups
