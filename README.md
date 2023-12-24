@@ -16,7 +16,8 @@ which would be equivalent to the following in MySQL:
 SELECT $columns FROM $table WHERE $filter ORDER BY $order_by LIMIT $limit;
 ```
 
-This library is built on top of the PHP [`MySQL Improved`](https://www.php.net/manual/en/book.mysqli.php) extension.
+> [!IMPORTANT]
+> This library is built on top of the PHP [`MySQL Improved`](https://www.php.net/manual/en/book.mysqli.php) extension and requires PHP 8.0 or newer.
 
 ## Install from composer
 
