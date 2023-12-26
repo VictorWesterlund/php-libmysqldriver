@@ -13,14 +13,14 @@
 			parent::__construct(...func_get_args());
 		}
 
-		// Coerce input to array
-		private static function to_array(mixed $input): array {
-			return is_array($input) ? $input : [$input];
+		// Coerce input to single dimensional array
+		private static function to_list_array(mixed $input): array {
+			return array_values(is_array($input) ? $input : [$input]);
 		}
 
 		// Execute SQL query with optional prepared statement and return array of affected rows
 		public function exec(string $sql, mixed $params = null): array {
-			$query = $this->execute_query($sql, self::to_array($params));
+			$query = $this->execute_query($sql, self::to_list_array($params));
 			$res = [];
 
 			// Fetch rows into sequential array
@@ -33,7 +33,7 @@
 
 		// Execute SQL query with optional prepared statement and return true if query was successful
 		public function exec_bool(string $sql, mixed $params = null): bool {
-			$query = $this->execute_query($sql, self::to_array($params));
+			$query = $this->execute_query($sql, self::to_list_array($params));
 
 			return gettype($query) === "boolean"
 				// Type is already a bool, so return it as is
