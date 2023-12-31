@@ -91,6 +91,12 @@
 						continue;
 					}
 
+					// Value is null so it does not need to be added to the prepared statement
+					if (is_null($value)) {
+						$filter[] = "`{$col}` IS NULL";
+						continue;
+					}
+
 					// Create SQL for prepared statement
 					$filter[] = "`{$col}` = ?";
 					// Append value to array with all other values
