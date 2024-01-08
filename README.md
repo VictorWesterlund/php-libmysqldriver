@@ -8,7 +8,7 @@ $db->for(string $table)
 ->with(array $model)
 ->where(array $filters)
 ->order(array $order_by)
-->limit(1)
+->limit(int|array $limit)
 ->select(array $columns): array|bool;
 ```
 which would be equivalent to the following in MySQL:
@@ -58,6 +58,8 @@ use libmysqldriver\MySQL;
 $db = new MySQL($host, $user, $pass, $db);
 ```
 
+All executor methods [`select()`](#select), [`update()`](#update), and [`insert()`](#insert) will return a [`mysqli_result`](https://www.php.net/manual/en/class.mysqli-result.php) object.
+
 # SELECT
 
 Use `MySQL->select()` to retrieve columns from a database table.
@@ -67,8 +69,7 @@ Pass an associative array of strings, CSV string, or null to this method to filt
 ```php
 $db->select(
   array|string|null $columns
-): array|bool;
-// Returns array of arrays for each row, or bool if no columns were defined
+): mysqli_result;
 ```
 
 In most cases you probably want to select with a constraint. Chain the [`where()`](#where) method before `select()` to filter the query
@@ -118,7 +119,7 @@ Use `MySQL->insert()` to append a new row to a database table
 $db->insert(
   // Array of values to INSERT
   array $values
-): bool
+): mysqli_result
 // Returns true if row was inserted
 ```
 
@@ -145,7 +146,7 @@ Modify existing rows with `MySQL->update()`
 $db->get(
   // Key, value array of column names and values to update
   array $fields,
-): bool;
+): mysqli_result;
 // Returns true if at least 1 row was changed
 ```
 

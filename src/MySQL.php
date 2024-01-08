@@ -3,14 +3,13 @@
 	namespace libmysqldriver;
 
 	use \Exception;
-	use \victorwesterlund\xEnum;
 
-	use libmysqldriver\Driver\DatabaseDriver;
-
-	require_once "DatabaseDriver.php";
+	use \mysqli;
+	use \mysqli_stmt;
+	use \mysqli_result;
 
 	// Interface for MySQL_Driver with abstractions for data manipulation
-	class MySQL extends DatabaseDriver {
+	class MySQL extends mysqli {
 		private string $table;
 		private ?array $model = null;
 
@@ -25,10 +24,19 @@
 			parent::__construct(...func_get_args());
 		}
 
+		/*
+			# Helper methods
+		*/
+
 		private function throw_if_no_table() {
 			if (!$this->table) {
 				throw new Exception("No table name defined");
 			}
+		}
+
+		// Coerce input to single dimensional array
+		private static function to_list_array(mixed $input): array {
+			return array_values(is_array($input) ? $input : [$input]);
 		}
 
 		// Return value(s) that exist in $this->model
@@ -39,7 +47,11 @@
 			return array_filter($columns, fn($col): string => in_array($col, $this->model));
 		}
 
-		/* ---- */
+		/*
+			# Definers
+			These methods are used to build an SQL query by chaining methods together.
+			Defined parameters will then be executed by an Executer method.
+		*/
 
 		// Use the following table name
 		public function for(string $table): self {
@@ -155,10 +167,13 @@
 			return $this;
 		}
 
-		/* ---- */
+		/*
+			# Executors
+			These methods execute various statements that each return a mysqli_result
+		*/
 
 		// Create Prepared Statament for SELECT with optional WHERE filters
-		public function select(array|string|null $columns = null): array|bool {
+		public function select(array|string|null $columns = null): mysqli_result {
 			$this->throw_if_no_table();
 
 			// Create array of columns from CSV
@@ -184,19 +199,14 @@
 			// Interpolate components into an SQL SELECT statmenet and execute
 			$sql = "SELECT {$columns_sql} FROM {$this->table}{$filter_sql}{$order_by_sql}{$limit_sql}";
 
-			// No columns were specified, return true if query matched rows
-			if (!$columns) {
-				return $this->exec_bool($sql, $this->filter_values);
-			}
-
 			// Return array of matched rows
-			$exec = $this->exec($sql, $this->filter_values);
+			$exec = $this->execute_query($sql, self::to_list_array($this->filter_values));
 			// Return array if exec was successful. Return as flattened array if flag is set
 			return empty($exec) || !$this->flatten ? $exec : $exec[0];
 		}
 
 		// Create Prepared Statement for UPDATE using PRIMARY KEY as anchor
-		public function update(array $entity): bool {
+		public function update(array $entity): mysqli_result {
 			$this->throw_if_no_table();
 
 			// Make constraint for table model if defined
@@ -224,11 +234,11 @@
 
 			// Interpolate components into an SQL UPDATE statement and execute
 			$sql = "UPDATE {$this->table} SET {$changes} {$filter_sql}";
-			return $this->exec_bool($sql, $values);
+			return $this->execute_query($sql, self::to_list_array($values));
 		}
 
 		// Create Prepared Statemt for INSERT
-		public function insert(array $values): bool {
+		public function insert(array $values): mysqli_result {
 			$this->throw_if_no_table();
 
 			// A value for each column in table model must be provided
@@ -241,6 +251,11 @@
 
 			// Interpolate components into an SQL INSERT statement and execute
 			$sql = "INSERT INTO {$this->table} VALUES ({$values_stmt})";
-			return $this->exec_bool($sql, $values);
+			return $this->execute_query($sql, self::to_list_array($values));
+		}
+
+		// Execute SQL query with optional prepared statement and return mysqli_result
+		public function exec(string $sql, mixed $params = null): mysqli_result {
+			return $this->execute_query($sql, self::to_list_array($params));
 		}
 	}
