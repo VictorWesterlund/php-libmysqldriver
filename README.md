@@ -8,7 +8,7 @@ $db->for(string $table)
 ->with(array $model)
 ->where(array $filters)
 ->order(array $order_by)
-->limit(1)
+->limit(int|array $limit)
 ->select(array $columns): array|bool;
 ```
 which would be equivalent to the following in MySQL:
