@@ -39,6 +39,16 @@
 			return array_values(is_array($input) ? $input : [$input]);
 		}
 
+		// Convert value to MySQL tinyint
+		private static function filter_boolean(mixed $value): int {
+			return (int) filter_var($value, FILTER_VALIDATE_BOOLEAN);
+		}
+
+		// Convert all boolean type values to tinyints in array
+		private static function filter_booleans(array $values): array {
+			return array_map(fn($v): mixed => gettype($v) === "boolean" ? self::filter_boolean($v) : $v, $values);
+		}
+
 		// Return value(s) that exist in $this->model
 		private function in_model(string|array $columns): ?array {
 			// Place string into array
@@ -226,8 +236,10 @@
 			// Get array of SQL WHERE string and filter values
 			$filter_sql = !is_null($this->filter_sql) ? " WHERE {$this->filter_sql}" : "";
 
-			$values = array_values($entity);
-			// Append filter values if defined
+			// Get values from entity and convert booleans to tinyint
+			$values = self::filter_booleans(array_values($entity));
+			
+			// Append values to filter property if where() was chained
 			if ($this->filter_values) {
 				array_push($values, ...$this->filter_values);
 			}
@@ -245,6 +257,9 @@
 			if ($this->model && count($values) !== count($this->model)) {
 				throw new Exception("Values length does not match columns in model");
 			}
+
+			// Convert booleans to tinyint
+			$values = self::filter_booleans($values);
 
 			// Create CSV string with Prepared Statement abbreviatons from length of fields array.
 			$values_stmt = implode(",", array_fill(0, count($values), "?"));
