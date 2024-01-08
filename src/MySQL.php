@@ -173,7 +173,7 @@
 		*/
 
 		// Create Prepared Statament for SELECT with optional WHERE filters
-		public function select(array|string|null $columns = null): mysqli_result {
+		public function select(array|string|null $columns = null): mysqli_result|bool {
 			$this->throw_if_no_table();
 
 			// Create array of columns from CSV
@@ -206,7 +206,7 @@
 		}
 
 		// Create Prepared Statement for UPDATE using PRIMARY KEY as anchor
-		public function update(array $entity): mysqli_result {
+		public function update(array $entity): mysqli_result|bool {
 			$this->throw_if_no_table();
 
 			// Make constraint for table model if defined
@@ -238,7 +238,7 @@
 		}
 
 		// Create Prepared Statemt for INSERT
-		public function insert(array $values): mysqli_result {
+		public function insert(array $values): mysqli_result|bool {
 			$this->throw_if_no_table();
 
 			// A value for each column in table model must be provided
