@@ -58,7 +58,7 @@ use libmysqldriver\MySQL;
 $db = new MySQL($host, $user, $pass, $db);
 ```
 
-All executor methods [`select()`](#select), [`update()`](#update), and [`insert()`](#insert) will return a [`mysqli_result`](https://www.php.net/manual/en/class.mysqli-result.php) object.
+All executor methods [`select()`](#select), [`update()`](#update), and [`insert()`](#insert) will return a [`mysqli_result`](https://www.php.net/manual/en/class.mysqli-result.php) object or boolean.
 
 # SELECT
 
@@ -69,7 +69,7 @@ Pass an associative array of strings, CSV string, or null to this method to filt
 ```php
 $db->select(
   array|string|null $columns
-): mysqli_result;
+): mysqli_result|bool;
 ```
 
 In most cases you probably want to select with a constraint. Chain the [`where()`](#where) method before `select()` to filter the query
@@ -119,7 +119,7 @@ Use `MySQL->insert()` to append a new row to a database table
 $db->insert(
   // Array of values to INSERT
   array $values
-): mysqli_result
+): mysqli_result|bool
 // Returns true if row was inserted
 ```
 
@@ -146,7 +146,7 @@ Modify existing rows with `MySQL->update()`
 $db->get(
   // Key, value array of column names and values to update
   array $fields,
-): mysqli_result;
+): mysqli_result|bool;
 // Returns true if at least 1 row was changed
 ```
 
