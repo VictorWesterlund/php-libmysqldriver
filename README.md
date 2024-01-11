@@ -4,12 +4,12 @@ This library provides abstraction methods for common operations on MySQL-like da
 
 For example:
 ```php
-$db->for(string $table)
-->with(array $model)
-->where(array $filters)
-->order(array $order_by)
-->limit(int|array $limit)
-->select(array $columns): array|bool;
+MySQL->for(string $table)
+  ->with(array $model)
+  ->where(array $filters)
+  ->order(array $order_by)
+  ->limit(int|array $limit)
+  ->select(array $columns): array|bool;
 ```
 which would be equivalent to the following in MySQL:
 ```sql
@@ -67,7 +67,7 @@ Use `MySQL->select()` to retrieve columns from a database table.
 Pass an associative array of strings, CSV string, or null to this method to filter columns.
 
 ```php
-$db->select(
+MySQL->select(
   array|string|null $columns
 ): mysqli_result|bool;
 ```
@@ -76,8 +76,7 @@ In most cases you probably want to select with a constraint. Chain the [`where()
 
 ### Example
 ```php
-$beverages = $db->for("beverages")->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages
-$beverages = $db->for("beverages")->select("beverage_name, beverage_size"); // SELECT beverage_name, beverage_size FROM beverages
+$beverages = MySQL->for("beverages")->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages
 ```
 ```
 [
@@ -102,7 +101,7 @@ This will return the key value pairs of the first entry directly.
 > This method will not set `LIMIT 1` for you. It is recommended to chain `MySQL->limit(1)` anywhere before `MySQL->select()`. [You can read more about it here](https://github.com/VictorWesterlund/php-libmysqldriver/issues/14)
 
 ```php
-$coffee = $db->for("beverages")->limit(1)->flatten()->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages WHERE beverage_type = "coffee" LIMIT 1
+$coffee = MySQL->for("beverages")->limit(1)->flatten()->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages WHERE beverage_type = "coffee" LIMIT 1
 ```
 ```php
 [
@@ -116,7 +115,7 @@ $coffee = $db->for("beverages")->limit(1)->flatten()->select(["beverage_name", "
 Use `MySQL->insert()` to append a new row to a database table
 
 ```php
-$db->insert(
+MySQL->insert(
   // Array of values to INSERT
   array $values
 ): mysqli_result|bool
@@ -126,7 +125,7 @@ $db->insert(
 #### Example
 
 ```php
-$db->for("beverages")->insert([
+MySQL->for("beverages")->insert([
   null,
   "coffee",
   "latte",
@@ -143,7 +142,7 @@ true
 Modify existing rows with `MySQL->update()`
 
 ```php
-$db->get(
+MySQL->get(
   // Key, value array of column names and values to update
   array $fields,
 ): mysqli_result|bool;
@@ -152,7 +151,7 @@ $db->get(
 
 ### Example
 ```php
-$db->for("beverages")->update(["beverage_size" => 10]); // UPDATE beverages SET beverage_size = 10
+MySQL->for("beverages")->update(["beverage_size" => 10]); // UPDATE beverages SET beverage_size = 10
 ```
 ```php
 true
@@ -167,7 +166,7 @@ Filter a `select()` or `update()` method by chaining the `MySQL->where()` method
 
 ### Example
 ```php
-$coffee = $db->for("beverages")->where(["beverage_type" => "coffee"])->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages WHERE (beverage_type = "coffee");
+$coffee = MySQL->for("beverages")->where(["beverage_type" => "coffee"])->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages WHERE (beverage_type = "coffee");
 ```
 ```php
 [
@@ -227,7 +226,7 @@ WHERE (beverage_type = 'coffee' AND beverage_size = 15) OR (beverage_type = 'tea
 Chain the `order()` method before a `select()` statement to order by a specific column
 
 ```php
-$coffee = $db->for("beverages")->order(["beverage_name" => "ASC"])->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages ORDER BY beverage_name ASC
+$coffee = MySQL->for("beverages")->order(["beverage_name" => "ASC"])->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages ORDER BY beverage_name ASC
 ```
 ```php
 [
@@ -254,7 +253,7 @@ Chain the `limit()` method before a `select()` statement to limit the amount of 
 This will simply `LIMIT` the results returned to the integer passed
 
 ```php
-$coffee = $db->for("beverages")->limit(1)->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages WHERE beverage_type = "coffee" LIMIT 1
+$coffee = MySQL->for("beverages")->limit(1)->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages WHERE beverage_type = "coffee" LIMIT 1
 ```
 ```php
 [
@@ -269,7 +268,7 @@ $coffee = $db->for("beverages")->limit(1)->select(["beverage_name", "beverage_si
 This will `OFFSET` and `LIMIT` the results returned from the first key of the array as `OFFSET` and the value of that key as `LIMIT`
 
 ```php
-$coffee = $db->for("beverages")->limit([3 => 2])->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages LIMIT 3 OFFSET 2
+$coffee = MySQL->for("beverages")->limit([3 => 2])->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages LIMIT 3 OFFSET 2
 ```
 ```php
 [
