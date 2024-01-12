@@ -5,10 +5,10 @@ This library provides abstraction methods for common operations on MySQL-like da
 For example:
 ```php
 MySQL->for(string $table)
-  ->with(array $model)
-  ->where(array $filters)
-  ->order(array $order_by)
-  ->limit(int|array $limit)
+  ->with(?array $model)
+  ->where(?array ...$conditions)
+  ->order(?array $order_by)
+  ->limit(int|array|null $limit)
   ->select(array $columns): array|bool;
 ```
 which would be equivalent to the following in MySQL:
@@ -142,7 +142,7 @@ true
 Modify existing rows with `MySQL->update()`
 
 ```php
-MySQL->get(
+MySQL->update(
   // Key, value array of column names and values to update
   array $fields,
 ): mysqli_result|bool;
@@ -163,6 +163,12 @@ In most cases you probably want to UPDATE against a constaint. Chain a [`where()
 # WHERE
 
 Filter a `select()` or `update()` method by chaining the `MySQL->where()` method anywhere before it.
+
+```php
+MySQL->where(
+  ?array ...$conditions
+): self;
+```
 
 ### Example
 ```php
@@ -226,6 +232,12 @@ WHERE (beverage_type = 'coffee' AND beverage_size = 15) OR (beverage_type = 'tea
 Chain the `order()` method before a `select()` statement to order by a specific column
 
 ```php
+MySQL->order(
+  ?array $order_by
+): self;
+```
+
+```php
 $coffee = MySQL->for("beverages")->order(["beverage_name" => "ASC"])->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages ORDER BY beverage_name ASC
 ```
 ```php
@@ -245,6 +257,12 @@ $coffee = MySQL->for("beverages")->order(["beverage_name" => "ASC"])->select(["b
 # LIMIT
 
 Chain the `limit()` method before a `select()` statement to limit the amount of columns returned
+
+```php
+MySQL->limit(
+  int|array|null $limit
+): self;
+```
 
 > **Note**
 > You can also flatten to a single dimensional array from the first entity by chaining [`MySQL->flatten()`](#flatten-array-to-single-dimension)
