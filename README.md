@@ -260,14 +260,15 @@ Chain the `limit()` method before a `select()` statement to limit the amount of 
 
 ```php
 MySQL->limit(
-  int|array|null $limit
+  ?int $limit,
+  ?int $offset = null
 ): self;
 ```
 
 > **Note**
 > You can also flatten to a single dimensional array from the first entity by chaining [`MySQL->flatten()`](#flatten-array-to-single-dimension)
 
-## Passing an integer to LIMIT
+## Passing a single integer argument
 This will simply `LIMIT` the results returned to the integer passed
 
 ```php
@@ -282,11 +283,11 @@ $coffee = MySQL->for("beverages")->limit(1)->select(["beverage_name", "beverage_
 ]
 ```
 
-## Passing an associative array to LIMIT
-This will `OFFSET` and `LIMIT` the results returned from the first key of the array as `OFFSET` and the value of that key as `LIMIT`
+## Passing two integer arguments
+This will `OFFSET` and `LIMIT` the results returned. The first argument will be the `LIMIT` and the second argument will be its `OFFSET`.
 
 ```php
-$coffee = MySQL->for("beverages")->limit([3 => 2])->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages LIMIT 3 OFFSET 2
+$coffee = MySQL->for("beverages")->limit(3, 2)->select(["beverage_name", "beverage_size"]); // SELECT beverage_name, beverage_size FROM beverages LIMIT 3 OFFSET 2
 ```
 ```php
 [
