@@ -94,7 +94,15 @@
 		}
 
 		// Create a WHERE statement from filters
-		public function where(array ...$conditions): self {
+		public function where(?array ...$conditions): self {
+			// Unset filters if null was passed
+			if ($conditions === null) {
+				$this->filter_sql = null;
+				$this->filter_values = null;
+
+				return $this;
+			}
+
 			$values = [];
 			$filters = [];
 
@@ -143,7 +151,13 @@
 		}
 
 		// Return SQL LIMIT string from integer or array of [offset => limit]
-		public function limit(int|array $limit): self {
+		public function limit(int|array|null $limit): self {
+			// Unset row limit if null was passed
+			if ($limit === null) {
+				$this->limit = null;
+				return $this;
+			}
+
 			// Set LIMIT without range directly as integer
 			if (is_int($limit)) {
 				$this->limit = $limit;
@@ -167,7 +181,13 @@
 		}
 
 		// Return SQL SORT BY string from assoc array of columns and direction
-		public function order(array $order_by): self {
+		public function order(?array $order_by): self {
+			// Unset row order by if null was passed
+			if ($order_by === null) {
+				$this->order_by = null;
+				return $this;
+			}
+
 			// Create CSV from columns
 			$sql = implode(",", array_keys($order_by));
 			// Create pipe DSV from values 
