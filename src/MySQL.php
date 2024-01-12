@@ -17,7 +17,7 @@
 		private ?string $order_by = null;
 		private ?string $filter_sql = null;
 		private array $filter_values = [];
-		private int|string|null $limit = null;
+		private ?string $limit = null;
 
 		// Pass constructor arguments to driver
 		function __construct() {
@@ -150,8 +150,8 @@
 			return $this;
 		}
 
-		// Return SQL LIMIT string from integer or array of [offset => limit]
-		public function limit(int|array|null $limit): self {
+		// SQL LIMIT string
+		public function limit(?int $limit, ?int $offset = null): self {
 			// Unset row limit if null was passed
 			if ($limit === null) {
 				$this->limit = null;
@@ -164,12 +164,13 @@
 				return $this;
 			}
 
-			// Use array key as LIMIT range start value
-			$offset = (int) array_keys($limit)[0];
-			// Use array value as LIMIT range end value
-			$limit = (int) array_values($limit)[0];
+			// No offset defined, set limit property directly as string
+			if (is_null($offset)) {
+				$this->limit = (string) $limit;
+				return $this;
+			}
 
-			// Set limit as SQL CSV
+			// Set limit and offset as SQL CSV
 			$this->limit = "{$offset},{$limit}";
 			return $this;
 		}
