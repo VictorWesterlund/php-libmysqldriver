@@ -150,11 +150,17 @@
 			return $this;
 		}
 
-		// Return SQL LIMIT string from integer or array of [offset => limit]
+		// SQL LIMIT string
 		public function limit(?int $limit, ?int $offset = null): self {
 			// Unset row limit if null was passed
 			if ($limit === null) {
 				$this->limit = null;
+				return $this;
+			}
+
+			// Set LIMIT without range directly as integer
+			if (is_int($limit)) {
+				$this->limit = $limit;
 				return $this;
 			}
 
