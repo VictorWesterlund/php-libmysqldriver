@@ -112,7 +112,9 @@ $coffee = MySQL->for("beverages")->limit(1)->flatten()->select(["beverage_name",
 
 # INSERT
 
-Use `MySQL->insert()` to append a new row to a database table
+Use `MySQL->insert()` to append a new row to a database table.
+
+Passing a sequential array to `insert()` will assume that you wish to insert data for all defined columns in the table. Pass an associative array of `[column_name => value]` to INSERT data for specific columns (assuming the other columns have a [DEFAULT](https://dev.mysql.com/doc/refman/8.0/en/data-type-defaults.html) value defined).
 
 ```php
 MySQL->insert(
