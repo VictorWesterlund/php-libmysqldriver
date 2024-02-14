@@ -279,6 +279,12 @@
 				throw new Exception("Values length does not match columns in model");
 			}
 
+			/*
+				Use array keys from $values as columns to insert if array is associative.
+				Treat statement as an all-columns INSERT if the $values array is sequential.
+			*/
+			$columns = !array_is_list($values) ? "(" . implode(",", array_keys($values)) . ")" : "";
+
 			// Convert booleans to tinyint
 			$values = self::filter_booleans($values);
 
@@ -286,7 +292,7 @@
 			$values_stmt = implode(",", array_fill(0, count($values), "?"));
 
 			// Interpolate components into an SQL INSERT statement and execute
-			$sql = "INSERT INTO {$this->table} VALUES ({$values_stmt})";
+			$sql = "INSERT INTO {$this->table} {$columns} VALUES ({$values_stmt})";
 			return $this->execute_query($sql, self::to_list_array($values));
 		}
 
