@@ -37,6 +37,7 @@ Statement|Method
 `SELECT`|[`select()`](#select)
 `UPDATE`|[`update()`](#update)
 `INSERT`|[`insert()`](#insert)
+`DELETE`|[`delete()`](#delete)
 `WHERE`|[`where()`](#where)
 `ORDER BY`|[`order()`](#order-by)
 `LIMIT`|[`limit()`](#limit)
@@ -139,6 +140,34 @@ MySQL->for("beverages")->insert([
 true
 ```
 
+# DELETE
+
+Use `MySQL->delete()` to remove a row or rows from the a database table.
+
+```php
+MySQL->delete(
+  array ...$conditions
+): mysqli_result|bool
+// Returns true if at least one row was deleted
+```
+
+This method takes at least one [`MySQL->where()`](#where)-syntaxed argument to determine which row or rows to delete. Refer to the [`MySQL->where()`](#where) section for more information.
+
+#### Example
+
+```php
+MySQL->for("beverages")->insert([
+  null,
+  "coffee",
+  "latte",
+  10
+]);
+// INSERT INTO beverages VALUES (null, "coffee", "latte", 10);
+```
+```
+true
+```
+
 # UPDATE
 
 Modify existing rows with `MySQL->update()`
@@ -164,7 +193,7 @@ In most cases you probably want to UPDATE against a constaint. Chain a [`where()
 
 # WHERE
 
-Filter a `select()` or `update()` method by chaining the `MySQL->where()` method anywhere before it.
+Filter a `select()` or `update()` method by chaining the `MySQL->where()` method anywhere before it. The `MySQL->delete()` executor method also uses the same syntax for its arguments.
 
 ```php
 MySQL->where(

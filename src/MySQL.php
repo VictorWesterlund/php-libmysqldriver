@@ -296,6 +296,29 @@
 			return $this->execute_query($sql, self::to_list_array($values));
 		}
 
+		// Create Prepared Statemente for DELETE with WHERE condition(s)
+		public function delete(array ...$conditions): mysqli_result|bool {
+			$this->throw_if_no_table();
+
+			// Make constraint for table model if defined
+			if ($this->model) {
+				foreach ($conditions as $condition) {
+					foreach (array_keys($condition) as $col) {
+						// Throw if column in entity does not exist in defiend table model
+						if (!in_array($col, $this->model)) {
+							throw new Exception("Column key '{$col}' does not exist in table model");
+						}
+					}
+				}
+			}
+
+			// Set DELETE WHERE conditions from arguments
+			$this->where(...$conditions);
+
+			$sql = "DELETE FROM {$this->table} WHERE {$this->filter_sql}";
+			return $this->execute_query($sql, self::to_list_array($this->filter_values));
+		}
+
 		// Execute SQL query with optional prepared statement and return mysqli_result
 		public function exec(string $sql, mixed $params = null): mysqli_result {
 			return $this->execute_query($sql, self::to_list_array($params));
