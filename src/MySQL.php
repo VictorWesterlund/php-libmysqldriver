@@ -65,6 +65,11 @@
 
 		// Use the following table name
 		public function for(string $table): self {
+			// Reset all definers when a new query begins
+			$this->where();
+			$this->limit();
+			$this->order();
+
 			$this->table = $table;
 			return $this;
 		}
@@ -151,7 +156,7 @@
 		}
 
 		// SQL LIMIT string
-		public function limit(?int $limit, ?int $offset = null): self {
+		public function limit(?int $limit = null, ?int $offset = null): self {
 			// Unset row limit if null was passed
 			if ($limit === null) {
 				$this->limit = null;
@@ -182,7 +187,7 @@
 		}
 
 		// Return SQL SORT BY string from assoc array of columns and direction
-		public function order(?array $order_by): self {
+		public function order(?array $order_by = null): self {
 			// Unset row order by if null was passed
 			if ($order_by === null) {
 				$this->order_by = null;
