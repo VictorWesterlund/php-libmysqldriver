@@ -61,9 +61,24 @@ $db = new MySQL($host, $user, $pass, $db);
 
 All executor methods [`select()`](#select), [`update()`](#update), and [`insert()`](#insert) will return a [`mysqli_result`](https://www.php.net/manual/en/class.mysqli-result.php) object or boolean.
 
+# FOR
+
+```php
+MySQL->for(
+  string $table
+): self;
+```
+
+All queries start by chaining the `for(string $table)` method. This will define which database table the current query should be executed on.
+
+*Example:*
+```php
+MySQL->for("beverages")->select("beverage_type");
+```
+
 # SELECT
 
-Use `MySQL->select()` to retrieve columns from a database table.
+Chain `MySQL->select()` anywhere after a [`MySQL->for()`](#for) to retrieve columns from a database table.
 
 Pass an associative array of strings, CSV string, or null to this method to filter columns.
 
@@ -113,7 +128,7 @@ $coffee = MySQL->for("beverages")->limit(1)->flatten()->select(["beverage_name",
 
 # INSERT
 
-Use `MySQL->insert()` to append a new row to a database table.
+Chain `MySQL->insert()` anywhere after a [`MySQL->for()`](#for) to append a new row to a database table.
 
 Passing a sequential array to `insert()` will assume that you wish to insert data for all defined columns in the table. Pass an associative array of `[column_name => value]` to INSERT data for specific columns (assuming the other columns have a [DEFAULT](https://dev.mysql.com/doc/refman/8.0/en/data-type-defaults.html) value defined).
 
@@ -142,7 +157,7 @@ true
 
 # DELETE
 
-Use `MySQL->delete()` to remove a row or rows from the a database table.
+Chain `MySQL->delete()` anywhere after a [`MySQL->for()`](#for) to remove a row or rows from the a database table.
 
 ```php
 MySQL->delete(
@@ -170,7 +185,7 @@ true
 
 # UPDATE
 
-Modify existing rows with `MySQL->update()`
+Chain `MySQL->update()` anywhere after a [`MySQL->for()`](#for) to modify existing rows in a database table.
 
 ```php
 MySQL->update(
@@ -188,12 +203,12 @@ MySQL->for("beverages")->update(["beverage_size" => 10]); // UPDATE beverages SE
 true
 ```
 
-In most cases you probably want to UPDATE against a constaint. Chain a [`where()`](#where) method before `update()` to set constraints
+In most cases you probably want to UPDATE against a constaint. Chain a [`where()`](#where) method before [`MySQL->update()`](#update) to set constraints
 
 
 # WHERE
 
-Filter a `select()` or `update()` method by chaining the `MySQL->where()` method anywhere before it. The `MySQL->delete()` executor method also uses the same syntax for its arguments.
+Filter a [`MySQL->select()`](#select) or [`MySQL->update()`](#update) method by chaining the `MySQL->where()` method anywhere before it. The [`MySQL->delete()`](#delete) executor method also uses the same syntax for its arguments.
 
 ```php
 MySQL->where(
@@ -260,7 +275,7 @@ WHERE (beverage_type = 'coffee' AND beverage_size = 15) OR (beverage_type = 'tea
 
 # ORDER BY
 
-Chain the `order()` method before a `select()` statement to order by a specific column
+Chain the `MySQL->order()` method before a [`MySQL->select()`](#select) statement to order by a specific column
 
 ```php
 MySQL->order(
@@ -287,7 +302,7 @@ $coffee = MySQL->for("beverages")->order(["beverage_name" => "ASC"])->select(["b
 
 # LIMIT
 
-Chain the `limit()` method before a `select()` statement to limit the amount of columns returned
+Chain the `limit()` method before a [`MySQL->select()`](#select) statement to limit the amount of columns returned
 
 ```php
 MySQL->limit(
