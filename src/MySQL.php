@@ -150,7 +150,7 @@
 			// OR all filter groups
 			$this->filter_sql = implode(" OR ", $filters);
 			// Set values property
-			$this->filter_values = $values;
+			$this->filter_values = self::filter_booleans($values);
 
 			return $this;
 		}
