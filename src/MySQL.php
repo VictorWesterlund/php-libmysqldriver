@@ -233,7 +233,7 @@
 			$filter_sql = !is_null($this->filter_sql) ? " WHERE {$this->filter_sql}" : "";
 
 			// Interpolate components into an SQL SELECT statmenet and execute
-			$sql = "SELECT {$columns_sql} FROM {$this->table}{$filter_sql}{$order_by_sql}{$limit_sql}";
+			$sql = "SELECT {$columns_sql} FROM `{$this->table}`{$filter_sql}{$order_by_sql}{$limit_sql}";
 
 			// Return array of matched rows
 			$exec = $this->execute_query($sql, self::to_list_array($this->filter_values));
@@ -271,7 +271,7 @@
 			}
 
 			// Interpolate components into an SQL UPDATE statement and execute
-			$sql = "UPDATE {$this->table} SET {$changes} {$filter_sql}";
+			$sql = "UPDATE `{$this->table}` SET {$changes} {$filter_sql}";
 			return $this->execute_query($sql, self::to_list_array($values));
 		}
 
@@ -297,7 +297,7 @@
 			$values_stmt = implode(",", array_fill(0, count($values), "?"));
 
 			// Interpolate components into an SQL INSERT statement and execute
-			$sql = "INSERT INTO {$this->table} {$columns} VALUES ({$values_stmt})";
+			$sql = "INSERT INTO `{$this->table}` {$columns} VALUES ({$values_stmt})";
 			return $this->execute_query($sql, self::to_list_array($values));
 		}
 
@@ -320,7 +320,7 @@
 			// Set DELETE WHERE conditions from arguments
 			$this->where(...$conditions);
 
-			$sql = "DELETE FROM {$this->table} WHERE {$this->filter_sql}";
+			$sql = "DELETE FROM `{$this->table}` WHERE {$this->filter_sql}";
 			return $this->execute_query($sql, self::to_list_array($this->filter_values));
 		}
 
