@@ -2,11 +2,15 @@
 
 	namespace libmysqldriver;
 
-	use \Exception;
+	use Exception;
+	
+	use mysqli;
+	use mysqli_stmt;
+	use mysqli_result;
 
-	use \mysqli;
-	use \mysqli_stmt;
-	use \mysqli_result;
+	use libmysqldriver\Operators;
+
+	require_once "Operators.php";
 
 	// Interface for MySQL_Driver with abstractions for data manipulation
 	class MySQL extends mysqli {
@@ -121,21 +125,36 @@
 				}
 
 				// Create SQL string and append values to array for prepared statement
-				foreach ($condition as $col => $value) {
+				foreach ($condition as $col => $operation) {
 					if ($this->model && !$this->in_model($col)) {
 						continue;
 					}
 
-					// Value is null so it does not need to be added to the prepared statement
-					if (is_null($value)) {
-						$filter[] = "`{$col}` IS NULL";
-						continue;
+					// Assume we want an equals comparison if value is not an array
+					if (!is_array($operation)) {
+						$operation = [Operators::EQUALS->value => $operation];
 					}
 
-					// Create SQL for prepared statement
-					$filter[] = "`{$col}` = ?";
-					// Append value to array with all other values
-					$values[] = $value;
+					// Resolve all operator enum values in inner array
+					foreach ($operation as $operator => $value) {
+						// Null values have special syntax
+						if (is_null($value)) {
+							// Treat anything that isn't an equals operator as falsy
+							if ($operator !== Operators::EQUALS->value) {
+								$filter[] = "`{$col}` IS NOT NULL";
+								continue;
+							}
+
+							$filter[] = "`{$col}` IS NULL";	
+							continue;
+						}
+
+						// Create SQL for prepared statement
+						$filter[] = "`{$col}` {$operator} ?";
+						
+						// Append value to array with all other values
+						$values[] = $value;
+					}
 				}
 
 				// AND together all conditions into a group
