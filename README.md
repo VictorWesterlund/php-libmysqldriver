@@ -210,6 +210,8 @@ In most cases you probably want to UPDATE against a constaint. Chain a [`where()
 
 Filter a [`MySQL->select()`](#select) or [`MySQL->update()`](#update) method by chaining the `MySQL->where()` method anywhere before it. The [`MySQL->delete()`](#delete) executor method also uses the same syntax for its arguments.
 
+Each key, value pair will be `AND` constrained against each other.
+
 ```php
 MySQL->where(
   ?array ...$conditions
@@ -233,9 +235,7 @@ $coffee = MySQL->for("beverages")->where(["beverage_type" => "coffee"])->select(
 ]
 ```
 
-## Advanced filtering
-
-You can do more detailed filtering by passing more constraints into the same array, or even futher by passing multiple arrays each with filters.
+## Capture groups
 
 ### AND
 
@@ -272,6 +272,25 @@ MySQL->where($filter1, $filter2, ...);
 WHERE (beverage_type = 'coffee' AND beverage_size = 15) OR (beverage_type = 'tea' AND beverage_name = 'black')
 ```
 
+## Define custom operators
+
+By default, all values in an the assoc array passed to `where()` will be treated as an `EQUALS` (=) operator.
+
+```php
+MySQL->where(["column" => "euqals_this_value"]);
+```
+
+Setting the value of any key to another assoc array will allow for more "advanced" filtering by defining your own [`Operators`](https://github.com/VictorWesterlund/php-libmysqldriver/blob/master/src/Operators.php).
+
+The key of this subarray can be any MySQL operator string, or the **->value** of any case in the [`Operators`](https://github.com/VictorWesterlund/php-libmysqldriver/blob/master/src/Operators.php) enum.
+
+```php
+MySQL->where([
+  "beverage_name" => [
+    Operators::LIKE->value => "%wildcard_contains%"
+  ]
+]);
+```
 
 # ORDER BY
 
