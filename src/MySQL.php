@@ -17,7 +17,6 @@
 		private string $table;
 		private ?array $model = null;
 
-		private bool $flatten = false;
 		private ?string $order_by = null;
 		private ?string $filter_sql = null;
 		private array $filter_values = [];
@@ -199,12 +198,6 @@
 			return $this;
 		}
 
-		// Flatten returned array to first entity if set
-		public function flatten(bool $flag = true): self {
-			$this->flatten = $flag;
-			return $this;
-		}
-
 		// Return SQL SORT BY string from assoc array of columns and direction
 		public function order(?array $order_by = null): self {
 			// Unset row order by if null was passed
@@ -253,11 +246,8 @@
 
 			// Interpolate components into an SQL SELECT statmenet and execute
 			$sql = "SELECT {$columns_sql} FROM `{$this->table}`{$filter_sql}{$order_by_sql}{$limit_sql}";
-
-			// Return array of matched rows
-			$exec = $this->execute_query($sql, self::to_list_array($this->filter_values));
-			// Return array if exec was successful. Return as flattened array if flag is set
-			return empty($exec) || !$this->flatten ? $exec : $exec[0];
+			// Return mysqli_response of matched rows
+			return $this->execute_query($sql, self::to_list_array($this->filter_values));
 		}
 
 		// Create Prepared Statement for UPDATE using PRIMARY KEY as anchor
