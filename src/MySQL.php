@@ -17,10 +17,13 @@
 		private string $table;
 		private ?array $model = null;
 
-		private ?string $order_by = null;
-		private ?string $filter_sql = null;
-		private array $filter_values = [];
 		private ?string $limit = null;
+		private ?string $order_by = null;
+		private array $filter_values = [];
+		private ?string $filter_sql = null;
+
+		// Array of last SELECT-ed columns
+		public ?array $columns = null;
 
 		// Pass constructor arguments to driver
 		function __construct() {
@@ -225,15 +228,15 @@
 			$this->throw_if_no_table();
 
 			// Create array of columns from CSV
-			$columns = is_array($columns) || is_null($columns) ? $columns : explode(",", $columns);
+			$this->columns = is_array($columns) || is_null($columns) ? $columns : explode(",", $columns);
 
 			// Filter columns that aren't in the model if defiend
 			if ($columns && $this->model) {
-				$columns = $this->in_model($columns);
+				$columns = $this->in_model($this->columns);
 			}
 
 			// Create CSV from columns or default to SQL NULL as a string
-			$columns_sql = $columns ? implode(",", $columns) : "NULL";
+			$columns_sql = $this->columns ? implode(",", $this->columns) : "NULL";
 
 			// Create LIMIT statement if argument is defined
 			$limit_sql = !is_null($this->limit) ? " LIMIT {$this->limit}" : "";
